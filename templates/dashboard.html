@@ -1,0 +1,92 @@
+{% extends "index.html" %}
+
+{% block head %}
+<title>Dashboard</title>
+{% endblock %}
+
+{% block actions %}
+<a href="{{ url_for('logout') }}" class="button">Log out</a>
+{% endblock %}
+
+{% block main %}
+
+<h1 class="page-header">Dashboard</h1>
+<p style="margin-top:5px;">Welcome, {{ session['username'] }}!</p>
+
+<!-- Message input form -->
+<form id="message-form">
+    <label for="recipient-input">Recipient</label>
+    <input class="inputfield" type="text" id="recipient-input">
+    <label for="message-input">Message text</label>
+    <textarea class="inputfield" id="message-input" placeholder="Type your message..."></textarea>
+    <button style="margin-top:10px;">Send</button>
+</form>
+
+<!-- Chat selection interface -->
+<div id="chats-container">
+    <!-- Chat list will be populated here -->
+</div>
+
+<!-- Chat display area -->
+<div id="chat-box" style="border: 1px solid #000; margin-top:10px;">
+    <div id="selected-chat" style="display: none;">
+        <!-- Messages for selected chat will be displayed here -->
+    </div>
+</div>
+
+<!-- Script for handling AJAX requests -->
+<script>
+    $(document).ready(function() {
+        // Function to update chats list
+        function updateChats() {
+            $.ajax({
+                url: '/get_chats',
+                type: 'GET',
+                success: function(chats) {
+                    $('#chats-container').html(chats);
+                }
+            });
+        }
+
+        // Call updateChats() function initially and every 5 seconds
+        updateChats();
+        setInterval(updateChats, 5000);
+
+        // Function to update chat messages
+        function updateMessages(recipient) {
+            $.ajax({
+                url: '/get_messages/' + recipient,
+                type: 'GET',
+                success: function(messages) {
+                    $('#selected-chat').html(messages);
+                    $('#selected-chat').show();
+                }
+            });
+        }
+
+        // Click event handler for chats
+        $(document).on('click', '.chat', function() {
+            var recipient = $(this).data('recipient');
+            updateMessages(recipient);
+        });
+
+        // Submit message form via AJAX
+        $('#message-form').submit(function(event) {
+            event.preventDefault();
+            var recipient = $('#recipient-input').val();
+            var message = $('#message-input').val();
+            $.ajax({
+                url: '/send_message',
+                type: 'POST',
+                data: {recipient: recipient, message: message},
+                success: function() {
+                    $('#recipient-input').val('');
+                    $('#message-input').val('');
+                    updateChats(); // Update chats list after sending message
+                }
+            });
+        });
+    });
+</script>
+
+{% endblock %}

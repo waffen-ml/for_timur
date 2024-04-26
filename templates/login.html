@@ -1,0 +1,23 @@
+{% extends "index.html" %}
+
+{% block head %}
+<title>Login</title>
+{% endblock %}
+
+{% block main%}
+<h1 class="page-header">Login</h1>
+<form action="{{ url_for('login') }}" method="post">
+    <label for="username">Username</label>
+    <input class="inputfield" type="text" name="username" id="username">
+    <label for="password">Password</label>
+    <input class="inputfield" type="password" name="password" id="password">
+    <input class="button" type="submit" value="Login">
+</form>
+
+<p>Don't have an account? <a href="{{ url_for('register') }}">Create Account</a></p>
+
+{% if error %}
+<p style="color: red;">{{ error }}</p>
+{% endif %}
+
+{% endblock %}
